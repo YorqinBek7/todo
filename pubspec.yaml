@@ -1,0 +1,49 @@
+name: todo
+description: A new Flutter project.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.1.2 <4.0.0'
+
+dependencies:
+  
+  #Request to API
+  dio: ^5.3.3
+  
+  #Equality
+  equatable: ^2.0.5
+  
+  #Local Storage
+  sqflite: ^2.3.0
+
+  #Get location
+  geolocator: ^10.1.0
+
+  #Notification
+  flutter_local_notifications: ^15.1.1
+
+  #Locator
+  get_it: ^7.6.4
+
+  #Log request
+  logger: ^2.0.2+1
+  
+  #UI
+  zoom_tap_animation: ^1.1.0
+  flutter_slidable: ^3.0.0
+
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+      - assets/png/
+      - assets/svg/
