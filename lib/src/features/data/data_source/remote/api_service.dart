@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:todo/src/core/resourses/data_state.dart';
-import 'package:todo/src/features/data/data_sources/remote/dio_exceptions.dart';
-import 'package:todo/src/features/data/data_sources/remote/end_points.dart';
-import 'package:todo/src/features/data/data_sources/remote/interceptors/logger.dart';
+import 'package:todo/src/features/data/data_source/remote/dio_exceptions.dart';
+import 'package:todo/src/features/data/data_source/remote/end_points.dart';
+import 'package:todo/src/features/data/data_source/remote/interceptors/logger.dart';
 
 class ApiService {
   late final Dio _dio;
@@ -18,7 +18,7 @@ class ApiService {
           ),
         )..interceptors.add(LoggerInterceptor());
 
-  Future<DataSate> getLocation({
+  Future<DataSate> getLocationName({
     required double lat,
     required double lon,
   }) async {
