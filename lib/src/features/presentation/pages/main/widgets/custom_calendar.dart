@@ -24,6 +24,7 @@ class CustomCalendar extends StatefulWidget {
     this.onDatePickerModeChange,
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
+    required this.savedDates,
   })  : initialDate = DateUtils.dateOnly(initialDate),
         firstDate = DateUtils.dateOnly(firstDate),
         lastDate = DateUtils.dateOnly(lastDate),
@@ -46,6 +47,7 @@ class CustomCalendar extends StatefulWidget {
       'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate',
     );
   }
+  final List<String> savedDates;
 
   final DateTime initialDate;
 
@@ -174,6 +176,7 @@ class _DatePickerDialogState extends State<CustomCalendar>
         currentDate: widget.currentDate,
         onDateChanged: _handleDateChanged,
         selectableDayPredicate: widget.selectableDayPredicate,
+        savedDates: widget.savedDates,
       );
     }
 
@@ -182,7 +185,7 @@ class _DatePickerDialogState extends State<CustomCalendar>
     picker = calendarDatePicker();
 
     return SizedBox(
-      height: 345,
+      height: 360,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

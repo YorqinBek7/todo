@@ -10,11 +10,17 @@ class EventFieldWithTitle extends StatelessWidget {
     required this.title,
     this.maxLine,
     this.suffixIcon,
+    this.onChanged,
+    this.onTap,
+    this.readOnly,
   });
   final TextEditingController controller;
   final String title;
   final int? maxLine;
   final String? suffixIcon;
+  final ValueChanged? onChanged;
+  final VoidCallback? onTap;
+  final bool? readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +34,9 @@ class EventFieldWithTitle extends StatelessWidget {
         TextField(
           controller: controller,
           maxLines: maxLine ?? 1,
+          onChanged: onChanged,
+          readOnly: readOnly ?? false,
+          onTap: onTap,
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.C_F3F4F6,

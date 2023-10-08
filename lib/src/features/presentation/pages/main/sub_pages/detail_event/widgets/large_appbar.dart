@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:todo/src/core/constants/constants.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/extentions/text_styles.dart';
+import 'package:todo/src/features/data/models/todo/todo_model.dart';
+import 'package:todo/src/features/data/repository/event_repository.dart';
 
 import '../../../../../../../core/colors/colors.dart';
 import '../../../../../../../core/icons/icons.dart';
@@ -10,12 +13,17 @@ import '../../../../../../widgets/icon_with_text.dart';
 class LargeAppBar extends StatelessWidget {
   const LargeAppBar({
     super.key,
+    required this.eventRepository,
+    required this.todoModel,
   });
+  final TodoModel todoModel;
+  final EventRepository eventRepository;
 
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
       pinned: true,
+      floating: false,
       elevation: 0.0,
       toolbarHeight: 200,
       automaticallyImplyLeading: false,
@@ -36,7 +44,6 @@ class LargeAppBar extends StatelessWidget {
             children: [
               60.ph,
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(60.0),
@@ -53,37 +60,49 @@ class LargeAppBar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const IconWithText(
+                  const Spacer(
+                    flex: 5,
+                  ),
+                  IconWithText(
                     icon: AppIcons.edit,
                     text: 'Edit',
                     itemsColor: AppColors.C_FFFFFF,
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppConstants.editEventPage,
+                        arguments: todoModel.id,
+                      );
+                    },
                   )
                 ],
               ),
               10.ph,
               Text(
-                'Watching Football',
+                todoModel.eventName,
                 style: context.displayMedium?.copyWith(
                   color: AppColors.C_FFFFFF,
                   fontSize: 26.0,
                 ),
               ),
               Text(
-                'Manchester United vs Arsenal (Premiere League)',
+                todoModel.eventDesc.length > 3
+                    ? '${todoModel.eventDesc..substring(0, 3)}...'
+                    : todoModel.eventDesc,
                 style: context.displaySmall?.copyWith(
                   color: AppColors.C_FFFFFF,
                 ),
               ),
               12.ph,
-              const IconWithText(
+              IconWithText(
                 icon: AppIcons.hour,
-                text: '17:00 - 18:30',
+                text: todoModel.eventTime,
                 itemsColor: AppColors.C_FFFFFF,
               ),
               12.ph,
-              const IconWithText(
+              IconWithText(
                 icon: AppIcons.location,
-                text: 'Stamford Bridge',
+                text: todoModel.eventLocation,
                 itemsColor: AppColors.C_FFFFFF,
               ),
             ],

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:todo/src/core/constants/constants.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/icons/icons.dart';
 import 'package:todo/src/features/presentation/pages/main/widgets/seek_button.dart';
@@ -9,8 +10,7 @@ import 'package:todo/src/features/presentation/pages/main/widgets/seek_button.da
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
 
 const double _dayPickerRowHeight = 60.0;
-const int _maxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
-// One extra row for the day-of-week header.
+const int _maxDayPickerRowCount = 6;
 
 class CustomCalendarDatePicker extends StatefulWidget {
   CustomCalendarDatePicker({
@@ -22,6 +22,7 @@ class CustomCalendarDatePicker extends StatefulWidget {
     required this.onDateChanged,
     this.onDisplayedMonthChanged,
     this.selectableDayPredicate,
+    required this.savedDates,
   })  : initialDate = DateUtils.dateOnly(initialDate),
         firstDate = DateUtils.dateOnly(firstDate),
         lastDate = DateUtils.dateOnly(lastDate),
@@ -67,6 +68,8 @@ class CustomCalendarDatePicker extends StatefulWidget {
 
   /// Function to provide full control over which dates in the calendar can be selected.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  final List<String> savedDates;
 
   @override
   State<CustomCalendarDatePicker> createState() =>
@@ -150,6 +153,7 @@ class _CustomCalendarDatePickerState extends State<CustomCalendarDatePicker> {
       onChanged: _handleDayChanged,
       onDisplayedMonthChanged: _handleMonthChanged,
       selectableDayPredicate: widget.selectableDayPredicate,
+      savedDates: widget.savedDates,
     );
   }
 
@@ -179,6 +183,7 @@ class _MonthPicker extends StatefulWidget {
     required this.onChanged,
     required this.onDisplayedMonthChanged,
     this.selectableDayPredicate,
+    required this.savedDates,
   })  : assert(!firstDate.isAfter(lastDate)),
         assert(!selectedDate.isBefore(firstDate)),
         assert(!selectedDate.isAfter(lastDate));
@@ -214,6 +219,8 @@ class _MonthPicker extends StatefulWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  final List<String> savedDates;
 
   @override
   _MonthPickerState createState() => _MonthPickerState();
@@ -286,7 +293,6 @@ class _MonthPickerState extends State<_MonthPicker> {
   void _handleDateSelected(DateTime selectedDate) {
     _focusedDay = selectedDate;
 
-    print(selectedDate);
     widget.onChanged(selectedDate);
   }
 
@@ -299,9 +305,6 @@ class _MonthPickerState extends State<_MonthPicker> {
         widget.onDisplayedMonthChanged(_currentMonth);
         if (_focusedDay != null &&
             !DateUtils.isSameMonth(_focusedDay, _currentMonth)) {
-          // We have navigated to a new month with the grid focused, but the
-          // focused day is not in this month. Choose a new one trying to keep
-          // the same day of the month.
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
         SemanticsService.announce(
@@ -481,6 +484,7 @@ class _MonthPickerState extends State<_MonthPicker> {
       lastDate: widget.lastDate,
       displayedMonth: month,
       selectableDayPredicate: widget.selectableDayPredicate,
+      savedDates: widget.savedDates,
     );
   }
 
@@ -561,6 +565,7 @@ class _DayPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     this.selectableDayPredicate,
+    required this.savedDates,
   })  : assert(!firstDate.isAfter(lastDate)),
         assert(!selectedDate.isBefore(firstDate)),
         assert(!selectedDate.isAfter(lastDate));
@@ -591,6 +596,8 @@ class _DayPicker extends StatefulWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  final List<String> savedDates;
 
   @override
   _DayPickerState createState() => _DayPickerState();
@@ -733,6 +740,8 @@ class _DayPickerState extends State<_DayPicker> {
               );
 
         Widget dayWidget = Container(
+          height: 35.0,
+          width: 35.0,
           decoration: decoration,
           child: Center(
             child: Text(localizations.formatDecimal(day),
@@ -745,21 +754,33 @@ class _DayPickerState extends State<_DayPicker> {
             child: dayWidget,
           );
         } else {
-          dayWidget = InkResponse(
-            focusNode: _dayFocusNodes[day - 1],
-            onTap: () => widget.onChanged(dayToBuild),
-            radius: _dayPickerRowHeight / 2 + 4,
-            statesController: MaterialStatesController(states),
-            overlayColor: dayOverlayColor,
-            child: Semantics(
-              label:
-                  '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}$semanticLabelSuffix',
-              // Set button to true to make the date selectable.
-              button: true,
-              selected: isSelectedDay,
-              excludeSemantics: true,
-              child: dayWidget,
-            ),
+          List<DateTime> date = [];
+          for (var i in widget.savedDates) {
+            date.add(DateTime.parse(i));
+          }
+
+          dayWidget = Stack(
+            children: [
+              InkResponse(
+                focusNode: _dayFocusNodes[day - 1],
+                onTap: () {
+                  widget.onChanged(dayToBuild);
+                  AppConstants.dateTime = dayToBuild;
+                },
+                radius: _dayPickerRowHeight / 2 + 4,
+                statesController: MaterialStatesController(states),
+                overlayColor: dayOverlayColor,
+                child: Semantics(
+                  label:
+                      '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}$semanticLabelSuffix',
+                  button: true,
+                  selected: isSelectedDay,
+                  excludeSemantics: true,
+                  child: dayWidget,
+                ),
+              ),
+              ...getList(date, dayToBuild)
+            ],
           );
         }
 
@@ -768,7 +789,7 @@ class _DayPickerState extends State<_DayPicker> {
     }
 
     return GridView.custom(
-      padding: const EdgeInsets.only(top: 20),
+      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: _dayPickerGridDelegate,
       childrenDelegate: SliverChildListDelegate(
@@ -776,6 +797,32 @@ class _DayPickerState extends State<_DayPicker> {
         addRepaintBoundaries: false,
       ),
     );
+  }
+
+  List<Positioned> getList(List<DateTime> data, DateTime dayToBuild) {
+    int k = 0;
+    for (var element in data) {
+      if (element.day == dayToBuild.day &&
+          element.year == dayToBuild.year &&
+          element.month == dayToBuild.month) {
+        k++;
+      }
+    }
+
+    return List.generate(k > 3 ? 3 : k, (index) {
+      return Positioned(
+        left: index * 15,
+        bottom: 5,
+        child: Container(
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.red,
+          ),
+          height: 4.0,
+          width: 4.0,
+        ),
+      );
+    });
   }
 }
 

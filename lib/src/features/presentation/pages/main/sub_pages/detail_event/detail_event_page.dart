@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:todo/src/core/colors/colors.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/extentions/text_styles.dart';
 import 'package:todo/src/core/icons/icons.dart';
+import 'package:todo/src/features/data/models/todo/todo_model.dart';
+import 'package:todo/src/features/data/repository/event_repository.dart';
+import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.dart';
 import 'widgets/large_appbar.dart';
 
 class DetailEventPage extends StatelessWidget {
-  const DetailEventPage({super.key});
+  const DetailEventPage({
+    super.key,
+    required this.todoModel,
+    required this.eventRepository,
+  });
+  final TodoModel todoModel;
+  final EventRepository eventRepository;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const LargeAppBar(),
+          LargeAppBar(
+            todoModel: todoModel,
+            eventRepository: eventRepository,
+          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28.0),
@@ -40,7 +53,7 @@ class DetailEventPage extends StatelessWidget {
                   ),
                   10.ph,
                   Text(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus vel ex sit amet neque dignissim mattis non eu est. Etiam pulvinar est mi, et porta magna accumsan nec. Ut vitae urna nisl. Integer gravida sollicitudin massa, ut congue orci posuere sit amet.',
+                    todoModel.eventDesc,
                     style: context.displaySmall?.copyWith(
                       color: AppColors.C_7C7B7B,
                       overflow: TextOverflow.clip,
@@ -57,7 +70,17 @@ class DetailEventPage extends StatelessWidget {
               children: [
                 const Spacer(),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () async {
+                    await eventRepository
+                        .deleteTodoById(
+                      todoModel.id,
+                    )
+                        .whenComplete(() {
+                      BlocProvider.of<GetEventsBloc>(context)
+                          .add(const GetTodosEvent());
+                      Navigator.pop(context);
+                    });
+                  },
                   child: Container(
                     height: 54.0,
                     margin: const EdgeInsets.symmetric(horizontal: 28.0),

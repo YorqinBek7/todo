@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/extentions/text_styles.dart';
+import 'package:todo/src/core/helper/helper.dart';
+import 'package:todo/src/features/data/models/todo/todo_model.dart';
 import 'package:todo/src/features/widgets/icon_with_text.dart';
 import '../../../../../core/icons/icons.dart';
 
 class CardItem extends StatelessWidget {
   const CardItem({
     super.key,
-    required this.itemsColor,
-    required this.backgroundColor,
     required this.onTap,
+    required this.todoModel,
   });
 
-  final Color itemsColor;
-  final Color backgroundColor;
   final VoidCallback onTap;
+  final TodoModel todoModel;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class CardItem extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 7.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
-          color: backgroundColor.withOpacity(.2),
+          color: Helper.hexToColor(todoModel.priorityColor).withOpacity(.2),
         ),
         height: 95.0,
         width: double.infinity,
@@ -38,7 +38,7 @@ class CardItem extends StatelessWidget {
                   topLeft: Radius.circular(10.0),
                   topRight: Radius.circular(10.0),
                 ),
-                color: backgroundColor,
+                color: Helper.hexToColor(todoModel.priorityColor),
               ),
             ),
             Padding(
@@ -47,23 +47,32 @@ class CardItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Watching Football',
+                    todoModel.eventName,
                     style: context.displayMedium?.copyWith(
-                      color: itemsColor,
+                      color: Helper.hexToColor(todoModel.priorityColor),
                     ),
                   ),
                   Text(
-                    'Profile Page, Cart, and Wishlist.',
+                    todoModel.eventDesc,
                     style: context.displaySmall?.copyWith(
                       fontSize: 8.0,
-                      color: itemsColor,
+                      color: Helper.hexToColor(todoModel.priorityColor),
                     ),
                   ),
                   10.ph,
-                  IconWithText(
-                    icon: AppIcons.hour,
-                    text: '21:00 - 22:30',
-                    itemsColor: itemsColor,
+                  Row(
+                    children: [
+                      IconWithText(
+                        icon: AppIcons.hour,
+                        text: todoModel.eventTime,
+                        itemsColor: Helper.hexToColor(todoModel.priorityColor),
+                      ),
+                      IconWithText(
+                        icon: AppIcons.location,
+                        text: todoModel.eventLocation,
+                        itemsColor: Helper.hexToColor(todoModel.priorityColor),
+                      )
+                    ],
                   )
                 ],
               ),
