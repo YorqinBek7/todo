@@ -79,6 +79,7 @@ class _EditEventViewState extends State<EditEventView> {
 
   @override
   Widget build(BuildContext context) {
+    selectNeededDayCubit = BlocProvider.of<SelectNeededDayCubit>(context);
     return BlocListener<GetLocationBloc, GetLocationState>(
       listener: (context, state) {
         if (state is GetLocationLoading) {
