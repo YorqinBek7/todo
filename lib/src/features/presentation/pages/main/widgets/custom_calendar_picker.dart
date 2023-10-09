@@ -2,9 +2,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo/src/core/constants/constants.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/icons/icons.dart';
+import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.dart';
 import 'package:todo/src/features/presentation/pages/main/widgets/seek_button.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
@@ -610,6 +612,8 @@ class _DayPickerState extends State<_DayPicker> {
   @override
   void initState() {
     super.initState();
+    AppConstants.dateTime = widget.currentDate;
+
     final int daysInMonth = DateUtils.getDaysInMonth(
         widget.displayedMonth.year, widget.displayedMonth.month);
     _dayFocusNodes = List<FocusNode>.generate(
@@ -766,6 +770,8 @@ class _DayPickerState extends State<_DayPicker> {
                 onTap: () {
                   widget.onChanged(dayToBuild);
                   AppConstants.dateTime = dayToBuild;
+                  BlocProvider.of<GetEventsBloc>(context)
+                      .add(GetTodosEvent(dayToBuild.toString()));
                 },
                 radius: _dayPickerRowHeight / 2 + 4,
                 statesController: MaterialStatesController(states),

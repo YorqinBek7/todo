@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:todo/src/core/colors/colors.dart';
+import 'package:todo/src/core/constants/constants.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/extentions/text_styles.dart';
 import 'package:todo/src/core/icons/icons.dart';
@@ -72,7 +73,10 @@ class DetailEventPage extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     BlocProvider.of<GetEventsBloc>(context)
-                        .add(RemoveTodoByIdEvent(todoModel.id));
+                        .add(RemoveTodoByIdEvent(
+                      id: todoModel.id,
+                      selectedDate: AppConstants.dateTime.toString(),
+                    ));
                     Navigator.pop(context);
                   },
                   child: Container(

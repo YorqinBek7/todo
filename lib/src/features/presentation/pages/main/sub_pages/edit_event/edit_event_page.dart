@@ -248,6 +248,7 @@ class _EditEventViewState extends State<EditEventView> {
       BlocProvider.of<GetEventsBloc>(context).add(EditTodoById(
         id: widget.todoModel.id,
         todoModel: cubit.state.todoModel,
+        selectedDate: AppConstants.dateTime.toString(),
       ));
       Navigator.pushNamedAndRemoveUntil(
         context,

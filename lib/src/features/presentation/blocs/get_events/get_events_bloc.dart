@@ -18,10 +18,13 @@ class GetEventsBloc extends Bloc<GetEventsEvent, GetEventsState> {
       GetTodosEvent event, Emitter<GetEventsState> emit) async {
     emit(const GetEventsLoading());
     try {
+      List<TodoModel> todoByDateList =
+          await eventRepository.getTodosByDate(event.selectedDate);
       List<TodoModel> todoList = await eventRepository.getTodos();
       emit(
         GetEventsSuccess(
-          todosModel: todoList,
+          todosByDateModel: todoByDateList,
+          todos: todoList,
         ),
       );
     } catch (e) {
@@ -35,10 +38,12 @@ class GetEventsBloc extends Bloc<GetEventsEvent, GetEventsState> {
     emit(const GetEventsLoading());
     try {
       await eventRepository.insertTodo(event.todoModel);
-      List<TodoModel> todoList = await eventRepository.getTodos();
+      List<TodoModel> todoList = await eventRepository.getTodosByDate(
+        event.selectedDate,
+      );
       emit(
         GetEventsSuccess(
-          todosModel: todoList,
+          todosByDateModel: todoList,
         ),
       );
     } catch (e) {
@@ -53,10 +58,11 @@ class GetEventsBloc extends Bloc<GetEventsEvent, GetEventsState> {
     emit(const GetEventsLoading());
     try {
       await eventRepository.deleteTodoById(event.id);
-      List<TodoModel> todoList = await eventRepository.getTodos();
+      List<TodoModel> todoList =
+          await eventRepository.getTodosByDate(event.selectedDate);
       emit(
         GetEventsSuccess(
-          todosModel: todoList,
+          todosByDateModel: todoList,
         ),
       );
     } catch (e) {
@@ -70,14 +76,14 @@ class GetEventsBloc extends Bloc<GetEventsEvent, GetEventsState> {
       EditTodoById event, Emitter<GetEventsState> emit) async {
     emit(const GetEventsLoading());
     try {
-      var a =
-          await eventRepository.editTodo(todo: event.todoModel, id: event.id);
-      print(a);
-      List<TodoModel> todoList = await eventRepository.getTodos();
-      print(todoList);
+      await eventRepository.editTodo(todo: event.todoModel, id: event.id);
+
+      List<TodoModel> todoList =
+          await eventRepository.getTodosByDate(event.selectedDate);
+
       emit(
         GetEventsSuccess(
-          todosModel: todoList,
+          todosByDateModel: todoList,
         ),
       );
     } catch (e) {

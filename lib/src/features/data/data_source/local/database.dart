@@ -43,6 +43,18 @@ class LocalDataBase {
     return await db.insert(TodoModelSQL.tableName, todoModel.toJson());
   }
 
+  Future<List<TodoModel>> getTodosByDate(String selectedDate) async {
+    final db = await instance._init();
+    final todos = await db.query(
+      TodoModelSQL.tableName,
+      where: 'event_date = ?',
+      whereArgs: [
+        selectedDate,
+      ],
+    );
+    return todos.map((e) => TodoModel.fromJson(e)).toList();
+  }
+
   Future<List<TodoModel>> getTodos() async {
     final db = await instance._init();
     final todos = await db.query(TodoModelSQL.tableName);

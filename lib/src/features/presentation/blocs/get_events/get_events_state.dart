@@ -15,12 +15,17 @@ final class GetEventsLoading extends GetEventsState {
 
 final class GetEventsSuccess extends GetEventsState {
   const GetEventsSuccess({
-    required this.todosModel,
+    required this.todosByDateModel,
+    this.todos,
   });
-  final List<TodoModel> todosModel;
+  final List<TodoModel> todosByDateModel;
+  final List<TodoModel>? todos;
 
   @override
-  List<Object> get props => [todosModel];
+  List<Object> get props => [
+        todosByDateModel,
+        todos!,
+      ];
 }
 
 final class GetEventsFailure extends GetEventsState {

@@ -8,24 +8,39 @@ sealed class GetEventsEvent extends Equatable {
 }
 
 final class GetTodosEvent extends GetEventsEvent {
-  const GetTodosEvent();
+  final String selectedDate;
+  const GetTodosEvent(this.selectedDate);
   @override
-  List<Object> get props => [];
+  List<Object> get props => [
+        selectedDate,
+      ];
 }
 
 final class AddTodoEvent extends GetEventsEvent {
-  const AddTodoEvent(this.todoModel);
+  const AddTodoEvent({
+    required this.todoModel,
+    required this.selectedDate,
+  });
   final TodoModel todoModel;
+  final String selectedDate;
   @override
-  List<Object> get props => [todoModel];
+  List<Object> get props => [
+        todoModel,
+        selectedDate,
+      ];
 }
 
 final class RemoveTodoByIdEvent extends GetEventsEvent {
-  const RemoveTodoByIdEvent(this.id);
+  const RemoveTodoByIdEvent({
+    required this.id,
+    required this.selectedDate,
+  });
   final int id;
+  final String selectedDate;
   @override
   List<Object> get props => [
         id,
+        selectedDate,
       ];
 }
 
@@ -33,14 +48,17 @@ final class EditTodoById extends GetEventsEvent {
   const EditTodoById({
     required this.id,
     required this.todoModel,
+    required this.selectedDate,
   });
 
   final TodoModel todoModel;
   final int id;
+  final String selectedDate;
 
   @override
   List<Object> get props => [
         id,
         todoModel,
+        selectedDate,
       ];
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:todo/src/core/constants/constants.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/extentions/text_styles.dart';
 import 'package:zoom_tap_animation/zoom_tap_animation.dart';
@@ -50,7 +51,9 @@ class CustomAppBar extends StatelessWidget {
         ),
         const Spacer(),
         ZoomTapAnimation(
-          onTap: () {},
+          onTap: () {
+            print(AppConstants.dateTime);
+          },
           child: SvgPicture.asset(
             AppIcons.notification,
           ),

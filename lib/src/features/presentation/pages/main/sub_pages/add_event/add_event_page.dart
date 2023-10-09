@@ -12,6 +12,7 @@ import 'package:todo/src/features/data/repository/event_repository.dart';
 import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.dart';
 import 'package:todo/src/features/presentation/blocs/get_location/get_location_bloc.dart';
 import 'package:todo/src/features/presentation/pages/locator.dart';
+import '../../../../blocs/events_for_calendar/event_for_calendar_bloc.dart';
 import '../../../../cubits/event_data/event_data_cubit.dart';
 import 'widgets/event_field_with_title.dart';
 
@@ -239,8 +240,12 @@ class _AddEventViewState extends State<AddEventView> {
     );
     var registerChecker = cubit.canAdd(cubit.state.todoModel);
     if (registerChecker.$1 == true) {
-      BlocProvider.of<GetEventsBloc>(context)
-          .add(AddTodoEvent(cubit.state.todoModel));
+      BlocProvider.of<GetEventsBloc>(context).add(AddTodoEvent(
+        todoModel: cubit.state.todoModel,
+        selectedDate: AppConstants.dateTime.toString(),
+      ));
+      BlocProvider.of<EventsForCalendarBloc>(context)
+          .add(EventsForCalendarEvent());
       Navigator.pop(context);
     } else {
       Helper.showErrorSnackbar(

@@ -9,6 +9,7 @@ import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.
 import 'package:todo/src/features/presentation/pages/main/widgets/custom_calendar.dart';
 import 'package:zoom_tap_animation/zoom_tap_animation.dart';
 import '../../../../core/helper/helper.dart';
+import '../../blocs/events_for_calendar/event_for_calendar_bloc.dart';
 import 'widgets/card_item.dart';
 import 'widgets/custom_appbar.dart';
 
@@ -33,7 +34,9 @@ class _MainPageState extends State<MainPage> {
       appBar: AppBar(),
       body: RefreshIndicator(
         onRefresh: () async {
-          BlocProvider.of<GetEventsBloc>(context).add(const GetTodosEvent());
+          BlocProvider.of<GetEventsBloc>(context).add(
+            GetTodosEvent(AppConstants.dateTime.toString()),
+          );
         },
         child: CustomScrollView(
           controller: _scrollController,
@@ -46,17 +49,17 @@ class _MainPageState extends State<MainPage> {
             SliverToBoxAdapter(
               child: 10.ph,
             ),
-            BlocBuilder<GetEventsBloc, GetEventsState>(
+            BlocBuilder<EventsForCalendarBloc, GetEventState>(
               builder: (context, state) {
-                if (state is GetEventsLoading) {
+                if (state is EventsForCalendarLoading) {
                   return const SliverToBoxAdapter(
                     child: Center(
                       child: CircularProgressIndicator(),
                     ),
                   );
-                } else if (state is GetEventsFailure) {
+                } else if (state is EventsForCalendarFailure) {
                   return SliverToBoxAdapter(child: Text(state.errorMessage));
-                } else if (state is GetEventsSuccess) {
+                } else if (state is EventsForCalendarSuccess) {
                   return SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 28.0),
                     sliver: SliverList(
@@ -135,20 +138,21 @@ class _MainPageState extends State<MainPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 28.0),
                       child: Column(
                         children: [
-                          if (state.todosModel.isEmpty)
+                          if (state.todosByDateModel.isEmpty)
                             Text(
                               'No data available',
                               style: context.displayMedium,
                             )
                           else
-                            ...List.generate(state.todosModel.length, (index) {
+                            ...List.generate(state.todosByDateModel.length,
+                                (index) {
                               return CardItem(
                                 onTap: () => Navigator.pushNamed(
                                   context,
                                   AppConstants.detailEventPage,
-                                  arguments: state.todosModel[index],
+                                  arguments: state.todosByDateModel[index],
                                 ),
-                                todoModel: state.todosModel[index],
+                                todoModel: state.todosByDateModel[index],
                               );
                             }),
                         ],
@@ -166,9 +170,9 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  List<String> getTodosDateTimes(GetEventsSuccess state) {
+  List<String> getTodosDateTimes(EventsForCalendarSuccess state) {
     List<String> data = [];
-    for (var e in state.todosModel) {
+    for (var e in state.todoModel) {
       for (var element in e.eventDate.split(',')) {
         data.add(element);
       }

@@ -5,6 +5,9 @@ class EventRepository {
   final LocalDataBase _localDataBase;
   const EventRepository(this._localDataBase);
 
+  Future<List<TodoModel>> getTodosByDate(String selectedDate) async =>
+      await _localDataBase.getTodosByDate(selectedDate);
+
   Future<List<TodoModel>> getTodos() async => await _localDataBase.getTodos();
 
   Future<int> deleteTodoById(int id) async =>
