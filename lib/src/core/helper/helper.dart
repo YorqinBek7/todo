@@ -65,6 +65,7 @@ class Helper {
   //Dismissable Dialog
   static void showDismissableDialog(BuildContext context) {
     showDialog(
+      barrierLabel: '',
       barrierDismissible: false,
       context: context,
       builder: (context) => Center(

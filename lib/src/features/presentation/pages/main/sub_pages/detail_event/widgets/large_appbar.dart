@@ -25,7 +25,7 @@ class LargeAppBar extends StatelessWidget {
       pinned: true,
       floating: false,
       elevation: 0.0,
-      toolbarHeight: 215,
+      toolbarHeight: 230,
       automaticallyImplyLeading: false,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
@@ -37,7 +37,7 @@ class LargeAppBar extends StatelessWidget {
             ),
           ),
         ),
-        titlePadding: const EdgeInsets.only(bottom: 10.0),
+        titlePadding: const EdgeInsets.only(bottom: 22.0),
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28.0),
           child: Column(

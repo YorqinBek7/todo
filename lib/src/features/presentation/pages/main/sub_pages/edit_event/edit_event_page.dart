@@ -99,6 +99,7 @@ class _EditEventViewState extends State<EditEventView> {
           toolbarHeight: 60.0,
         ),
         body: CustomScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           slivers: [
             SliverFillRemaining(
               hasScrollBody: false,
@@ -244,23 +245,19 @@ class _EditEventViewState extends State<EditEventView> {
     );
     var registerChecker = cubit.canAdd(cubit.state.todoModel);
     if (registerChecker.$1 == true) {
-      await widget.eventRepository
-          .editTodo(
-        todo: cubit.state.todoModel,
+      BlocProvider.of<GetEventsBloc>(context).add(EditTodoById(
         id: widget.todoModel.id,
-      )
-          .whenComplete(() {
-        BlocProvider.of<GetEventsBloc>(context).add(const GetTodosEvent());
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          AppConstants.mainPage,
-          (route) => false,
-        );
-        Helper.showSuccessSnackbar(
-          context: context,
-          successMessage: 'Successfuly edited',
-        );
-      });
+        todoModel: cubit.state.todoModel,
+      ));
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppConstants.mainPage,
+        (route) => false,
+      );
+      Helper.showSuccessSnackbar(
+        context: context,
+        successMessage: 'Successfuly edited',
+      );
     } else {
       Helper.showErrorSnackbar(
         context: context,

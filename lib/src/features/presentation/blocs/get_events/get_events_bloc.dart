@@ -10,12 +10,71 @@ class GetEventsBloc extends Bloc<GetEventsEvent, GetEventsState> {
   final EventRepository eventRepository;
   GetEventsBloc(this.eventRepository) : super(const GetEventsLoading()) {
     on<GetTodosEvent>(onGetTodosEvent);
+    on<AddTodoEvent>(onAddTodoEvent);
+    on<RemoveTodoByIdEvent>(onRemoveTodoByIdEvent);
+    on<EditTodoById>(onEditTodoByIdEvent);
   }
   void onGetTodosEvent(
       GetTodosEvent event, Emitter<GetEventsState> emit) async {
     emit(const GetEventsLoading());
     try {
       List<TodoModel> todoList = await eventRepository.getTodos();
+      emit(
+        GetEventsSuccess(
+          todosModel: todoList,
+        ),
+      );
+    } catch (e) {
+      emit(
+        GetEventsFailure(e.toString()),
+      );
+    }
+  }
+
+  void onAddTodoEvent(AddTodoEvent event, Emitter<GetEventsState> emit) async {
+    emit(const GetEventsLoading());
+    try {
+      await eventRepository.insertTodo(event.todoModel);
+      List<TodoModel> todoList = await eventRepository.getTodos();
+      emit(
+        GetEventsSuccess(
+          todosModel: todoList,
+        ),
+      );
+    } catch (e) {
+      emit(
+        GetEventsFailure(e.toString()),
+      );
+    }
+  }
+
+  void onRemoveTodoByIdEvent(
+      RemoveTodoByIdEvent event, Emitter<GetEventsState> emit) async {
+    emit(const GetEventsLoading());
+    try {
+      await eventRepository.deleteTodoById(event.id);
+      List<TodoModel> todoList = await eventRepository.getTodos();
+      emit(
+        GetEventsSuccess(
+          todosModel: todoList,
+        ),
+      );
+    } catch (e) {
+      emit(
+        GetEventsFailure(e.toString()),
+      );
+    }
+  }
+
+  void onEditTodoByIdEvent(
+      EditTodoById event, Emitter<GetEventsState> emit) async {
+    emit(const GetEventsLoading());
+    try {
+      var a =
+          await eventRepository.editTodo(todo: event.todoModel, id: event.id);
+      print(a);
+      List<TodoModel> todoList = await eventRepository.getTodos();
+      print(todoList);
       emit(
         GetEventsSuccess(
           todosModel: todoList,

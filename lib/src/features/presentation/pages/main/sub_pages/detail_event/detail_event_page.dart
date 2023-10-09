@@ -70,16 +70,10 @@ class DetailEventPage extends StatelessWidget {
               children: [
                 const Spacer(),
                 GestureDetector(
-                  onTap: () async {
-                    await eventRepository
-                        .deleteTodoById(
-                      todoModel.id,
-                    )
-                        .whenComplete(() {
-                      BlocProvider.of<GetEventsBloc>(context)
-                          .add(const GetTodosEvent());
-                      Navigator.pop(context);
-                    });
+                  onTap: () {
+                    BlocProvider.of<GetEventsBloc>(context)
+                        .add(RemoveTodoByIdEvent(todoModel.id));
+                    Navigator.pop(context);
                   },
                   child: Container(
                     height: 54.0,

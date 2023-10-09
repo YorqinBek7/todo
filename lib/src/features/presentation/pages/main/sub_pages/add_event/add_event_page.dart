@@ -93,6 +93,7 @@ class _AddEventViewState extends State<AddEventView> {
           toolbarHeight: 60.0,
         ),
         body: CustomScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           slivers: [
             SliverFillRemaining(
               hasScrollBody: false,
@@ -238,12 +239,9 @@ class _AddEventViewState extends State<AddEventView> {
     );
     var registerChecker = cubit.canAdd(cubit.state.todoModel);
     if (registerChecker.$1 == true) {
-      await widget.eventRepository
-          .insertTodo(cubit.state.todoModel)
-          .whenComplete(() {
-        BlocProvider.of<GetEventsBloc>(context).add(const GetTodosEvent());
-        Navigator.pop(context);
-      });
+      BlocProvider.of<GetEventsBloc>(context)
+          .add(AddTodoEvent(cubit.state.todoModel));
+      Navigator.pop(context);
     } else {
       Helper.showErrorSnackbar(
         context: context,
