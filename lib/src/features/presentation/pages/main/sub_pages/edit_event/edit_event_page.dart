@@ -7,6 +7,7 @@ import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/extentions/text_styles.dart';
 import 'package:todo/src/core/helper/helper.dart';
 import 'package:todo/src/core/icons/icons.dart';
+import 'package:todo/src/features/data/models/todo/todo_model.dart';
 import 'package:todo/src/features/data/models/todo/todo_model_key.dart';
 import 'package:todo/src/features/data/repository/event_repository.dart';
 import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.dart';
@@ -16,8 +17,11 @@ import '../../../../cubits/event_data/event_data_cubit.dart';
 import '../add_event/widgets/event_field_with_title.dart';
 
 class EditEventPage extends StatelessWidget {
-  final int id;
-  const EditEventPage({super.key, required this.id});
+  const EditEventPage({
+    super.key,
+    required this.todoModel,
+  });
+  final TodoModel todoModel;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +36,7 @@ class EditEventPage extends StatelessWidget {
       ],
       child: EditEventView(
         eventRepository: locator(),
-        id: id,
+        todoModel: todoModel,
       ),
     );
   }
@@ -42,10 +46,10 @@ class EditEventView extends StatefulWidget {
   const EditEventView({
     super.key,
     required this.eventRepository,
-    required this.id,
+    required this.todoModel,
   });
   final EventRepository eventRepository;
-  final int id;
+  final TodoModel todoModel;
 
   @override
   State<EditEventView> createState() => _EditEventViewState();
@@ -56,6 +60,8 @@ class _EditEventViewState extends State<EditEventView> {
   late TextEditingController _eventDescController;
   late TextEditingController _eventLocationController;
   late TextEditingController _eventTimeController;
+  late EventDataCubit cubit;
+  late GetLocationBloc bloc;
 
   @override
   void initState() {
@@ -63,13 +69,13 @@ class _EditEventViewState extends State<EditEventView> {
     _eventLocationController = TextEditingController();
     _eventNameController = TextEditingController();
     _eventTimeController = TextEditingController();
+    cubit = BlocProvider.of<EventDataCubit>(context);
+    bloc = BlocProvider.of<GetLocationBloc>(context);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final cubit = BlocProvider.of<EventDataCubit>(context);
-    final bloc = BlocProvider.of<GetLocationBloc>(context);
     return BlocListener<GetLocationBloc, GetLocationState>(
       listener: (context, state) {
         if (state is GetLocationLoading) {
@@ -78,11 +84,7 @@ class _EditEventViewState extends State<EditEventView> {
         } else if (state is GetLocationSuccess) {
           //Successfully fetched location
           Navigator.pop(context);
-          _eventLocationController.text = state.currentLocation.name;
-          cubit.updateTodoData(
-            TodoModelKey.eventLocation,
-            state.currentLocation.name,
-          );
+          writeLocationToCubitAndTextcontroller(state);
         } else if (state is GetLocationFailure) {
           //Show Error Message
           Navigator.pop(context);
@@ -94,7 +96,7 @@ class _EditEventViewState extends State<EditEventView> {
       },
       child: Scaffold(
         appBar: AppBar(
-          elevation: 0.0,
+          toolbarHeight: 60.0,
         ),
         body: CustomScrollView(
           slivers: [
@@ -127,13 +129,7 @@ class _EditEventViewState extends State<EditEventView> {
                         16.ph,
                         EventFieldWithTitle(
                           readOnly: true,
-                          onTap: () async {
-                            var geo = await _determinePosition();
-                            bloc.add(GetCurrentLocationEvent(
-                              lat: geo.latitude,
-                              lon: geo.longitude,
-                            ));
-                          },
+                          onTap: getLocation,
                           controller: _eventLocationController,
                           title: 'Event location',
                           suffixIcon: AppIcons.location,
@@ -166,48 +162,13 @@ class _EditEventViewState extends State<EditEventView> {
                         16.ph,
                         EventFieldWithTitle(
                           readOnly: true,
-                          onTap: () async {
-                            await getEventTime().then((selectedTime) {
-                              _eventTimeController.text =
-                                  '${selectedTime.$1} - ${selectedTime.$2}';
-                              cubit.updateTodoData(TodoModelKey.eventTime,
-                                  '${selectedTime.$1} - ${selectedTime.$2}');
-                            });
-                          },
+                          onTap: getTime,
                           controller: _eventTimeController,
                           title: 'Event Time',
                         ),
                         const Spacer(),
                         GestureDetector(
-                          onTap: () async {
-                            var registerChecker =
-                                cubit.canAdd(cubit.state.todoModel);
-                            if (registerChecker.$1 == true) {
-                              await widget.eventRepository
-                                  .editTodo(
-                                todo: cubit.state.todoModel,
-                                id: widget.id,
-                              )
-                                  .whenComplete(() {
-                                BlocProvider.of<GetEventsBloc>(context)
-                                    .add(const GetTodosEvent());
-                                Navigator.pushNamedAndRemoveUntil(
-                                  context,
-                                  AppConstants.mainPage,
-                                  (route) => false,
-                                );
-                                Helper.showSuccessSnackbar(
-                                  context: context,
-                                  successMessage: 'Successfuly edited',
-                                );
-                              });
-                            } else {
-                              Helper.showErrorSnackbar(
-                                context: context,
-                                errorMessage: registerChecker.$2,
-                              );
-                            }
-                          },
+                          onTap: editEvent,
                           child: Container(
                             height: 54.0,
                             width: double.infinity,
@@ -238,6 +199,77 @@ class _EditEventViewState extends State<EditEventView> {
     );
   }
 
+  void writeLocationToCubitAndTextcontroller(GetLocationSuccess state) {
+    if (state.currentLocation.name.isNotEmpty) {
+      _eventLocationController.text = state.currentLocation.name;
+      cubit.updateTodoData(
+        TodoModelKey.eventLocation,
+        state.currentLocation.name,
+      );
+    } else {
+      String splittedAdress =
+          '${state.currentLocation.displayName.split(',')[2]},${state.currentLocation.displayName.split(',')[3]}';
+      _eventLocationController.text = splittedAdress;
+      cubit.updateTodoData(
+        TodoModelKey.eventLocation,
+        splittedAdress,
+      );
+    }
+  }
+
+//WRITE TIME TO CUBIT AND TEXTCONTROLLER
+  void getTime() async {
+    await getEventTime().then((selectedTime) {
+      _eventTimeController.text = '${selectedTime.$1} - ${selectedTime.$2}';
+      cubit.updateTodoData(
+          TodoModelKey.eventTime, '${selectedTime.$1} - ${selectedTime.$2}');
+    });
+  }
+
+  //GET LOCATION
+  void getLocation() async {
+    var geo = await _determinePosition();
+    bloc.add(GetCurrentLocationEvent(
+      lat: geo.latitude,
+      lon: geo.longitude,
+    ));
+  }
+
+//EDIT EVENT
+  void editEvent() async {
+    List<String> eventDate = [widget.todoModel.eventDate];
+    cubit.updateTodoData(
+      TodoModelKey.eventDate,
+      eventDate.join(','),
+    );
+    var registerChecker = cubit.canAdd(cubit.state.todoModel);
+    if (registerChecker.$1 == true) {
+      await widget.eventRepository
+          .editTodo(
+        todo: cubit.state.todoModel,
+        id: widget.todoModel.id,
+      )
+          .whenComplete(() {
+        BlocProvider.of<GetEventsBloc>(context).add(const GetTodosEvent());
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppConstants.mainPage,
+          (route) => false,
+        );
+        Helper.showSuccessSnackbar(
+          context: context,
+          successMessage: 'Successfuly edited',
+        );
+      });
+    } else {
+      Helper.showErrorSnackbar(
+        context: context,
+        errorMessage: registerChecker.$2,
+      );
+    }
+  }
+
+//GET EVENT TIME
   Future<(String, String)> getEventTime() async {
     TimeOfDay? startTime;
     TimeOfDay? endTime;
@@ -256,6 +288,7 @@ class _EditEventViewState extends State<EditEventView> {
     return (startTime!.format(context), endTime!.format(context));
   }
 
+//GET LAT AND LON
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;

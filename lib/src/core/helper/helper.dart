@@ -47,6 +47,14 @@ class Helper {
     Fluttertoast.showToast(msg: message);
   }
 
+  static void showAlertMessage(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      backgroundColor: AppColors.C_056EA1,
+      textColor: AppColors.C_FFFFFF,
+    );
+  }
+
   //Convert String Hex to Color
   static Color hexToColor(String code) {
     String valueString = code.split('0x')[1].split(')')[0];

@@ -8,6 +8,7 @@ import 'package:todo/src/core/extentions/text_styles.dart';
 import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.dart';
 import 'package:todo/src/features/presentation/pages/main/widgets/custom_calendar.dart';
 import 'package:zoom_tap_animation/zoom_tap_animation.dart';
+import '../../../../core/helper/helper.dart';
 import 'widgets/card_item.dart';
 import 'widgets/custom_appbar.dart';
 
@@ -29,6 +30,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: RefreshIndicator(
         onRefresh: () async {
           BlocProvider.of<GetEventsBloc>(context).add(const GetTodosEvent());
@@ -48,7 +50,10 @@ class _MainPageState extends State<MainPage> {
               builder: (context, state) {
                 if (state is GetEventsLoading) {
                   return const SliverToBoxAdapter(
-                      child: CircularProgressIndicator());
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
                 } else if (state is GetEventsFailure) {
                   return SliverToBoxAdapter(child: Text(state.errorMessage));
                 } else if (state is GetEventsSuccess) {
@@ -71,11 +76,16 @@ class _MainPageState extends State<MainPage> {
                                 style: context.displayMedium,
                               ),
                               ZoomTapAnimation(
-                                onTap: () => Navigator.pushNamed(
-                                  context,
-                                  AppConstants.addEventPage,
-                                  arguments: getTodosDateTimes(state),
-                                ),
+                                onTap: () {
+                                  Helper.showMessage(
+                                    '${DateFormat('dd MMMM yyyy').format(AppConstants.dateTime)} has been chosen',
+                                  );
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppConstants.addEventPage,
+                                    arguments: getTodosDateTimes(state),
+                                  );
+                                },
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(10.0),

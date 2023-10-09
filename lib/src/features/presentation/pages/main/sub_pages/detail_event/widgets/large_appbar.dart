@@ -25,7 +25,7 @@ class LargeAppBar extends StatelessWidget {
       pinned: true,
       floating: false,
       elevation: 0.0,
-      toolbarHeight: 200,
+      toolbarHeight: 215,
       automaticallyImplyLeading: false,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
@@ -37,6 +37,7 @@ class LargeAppBar extends StatelessWidget {
             ),
           ),
         ),
+        titlePadding: const EdgeInsets.only(bottom: 10.0),
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28.0),
           child: Column(
@@ -71,7 +72,7 @@ class LargeAppBar extends StatelessWidget {
                       Navigator.pushNamed(
                         context,
                         AppConstants.editEventPage,
-                        arguments: todoModel.id,
+                        arguments: todoModel,
                       );
                     },
                   )

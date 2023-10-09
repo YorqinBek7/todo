@@ -18,7 +18,7 @@ class AppRoutes {
         return _toPage(const AddEventPage());
       case AppConstants.editEventPage:
         return _toPage(EditEventPage(
-          id: settings.arguments as int,
+          todoModel: settings.arguments as TodoModel,
         ));
       case AppConstants.detailEventPage:
         return _toPage(DetailEventPage(
