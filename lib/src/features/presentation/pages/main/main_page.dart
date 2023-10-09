@@ -6,6 +6,7 @@ import 'package:todo/src/core/constants/constants.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/extentions/text_styles.dart';
 import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.dart';
+import 'package:todo/src/features/presentation/cubits/select_needed_day/select_needed_day_cubit.dart';
 import 'package:todo/src/features/presentation/pages/main/widgets/custom_calendar.dart';
 import 'package:zoom_tap_animation/zoom_tap_animation.dart';
 import '../../../../core/helper/helper.dart';
@@ -30,22 +31,20 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    var neededDayCubit = BlocProvider.of<SelectNeededDayCubit>(context);
+
     return Scaffold(
       appBar: AppBar(),
       body: RefreshIndicator(
         onRefresh: () async {
           BlocProvider.of<GetEventsBloc>(context).add(
-            GetTodosEvent(AppConstants.dateTime.toString()),
+            GetTodosEvent(neededDayCubit.state.dateTime.toString()),
           );
         },
         child: CustomScrollView(
           controller: _scrollController,
           slivers: [
-            CustomAppBar(
-              onTap: () {},
-              date: DateFormat('dd MMMM yyyy').format(DateTime.now()),
-              day: DateFormat('EEEE').format(DateTime.now()),
-            ),
+            const CustomAppBar(),
             SliverToBoxAdapter(
               child: 10.ph,
             ),
@@ -81,7 +80,7 @@ class _MainPageState extends State<MainPage> {
                               ZoomTapAnimation(
                                 onTap: () {
                                   Helper.showMessage(
-                                    '${DateFormat('dd MMMM yyyy').format(AppConstants.dateTime)} has been chosen',
+                                    '${DateFormat('dd MMMM yyyy').format(neededDayCubit.state.dateTime)} has been chosen',
                                   );
                                   Navigator.pushNamed(
                                     context,
@@ -140,7 +139,7 @@ class _MainPageState extends State<MainPage> {
                         children: [
                           if (state.todosByDateModel.isEmpty)
                             Text(
-                              'No data available',
+                              'In this date tasks does not available',
                               style: context.displayMedium,
                             )
                           else

@@ -8,7 +8,7 @@ abstract class AppConstants {
   static const String addEventPage = '/add_event_page';
   static const String detailEventPage = '/detail_event_page';
   static const String editEventPage = '/edit_event_page';
-  static DateTime dateTime = DateTime.now();
+  // static DateTime dateTime = DateTime.now();
 
   //EVENT COLORS
   static List<Color> colors = [

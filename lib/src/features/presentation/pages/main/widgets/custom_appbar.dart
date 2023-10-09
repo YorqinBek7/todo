@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:todo/src/core/constants/constants.dart';
+import 'package:intl/intl.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/extentions/text_styles.dart';
+import 'package:todo/src/features/presentation/cubits/select_needed_day/select_needed_day_cubit.dart';
 import 'package:zoom_tap_animation/zoom_tap_animation.dart';
 
 import '../../../../../core/icons/icons.dart';
 
 class CustomAppBar extends StatelessWidget {
-  final VoidCallback onTap;
-  final String date;
-  final String day;
   const CustomAppBar({
     super.key,
-    required this.onTap,
-    required this.date,
-    required this.day,
   });
 
   @override
@@ -26,34 +22,33 @@ class CustomAppBar extends StatelessWidget {
         const Spacer(
           flex: 2,
         ),
-        Column(
-          children: [
-            Text(
-              day,
-              style: context.displayMedium,
-            ),
-            ZoomTapAnimation(
-              onTap: onTap,
-              child: Row(
-                children: [
-                  Text(
-                    date,
-                    style: context.displaySmall?.copyWith(fontSize: 10.0),
-                  ),
-                  4.pw,
-                  SvgPicture.asset(
-                    AppIcons.arrowBottom,
-                  )
-                ],
-              ),
-            ),
-          ],
+        BlocBuilder<SelectNeededDayCubit, SelectNeededDayState>(
+          builder: (context, state) {
+            return Column(
+              children: [
+                Text(
+                  DateFormat('dd MMMM yyyy').format(state.dateTime),
+                  style: context.displayMedium,
+                ),
+                Row(
+                  children: [
+                    Text(
+                      DateFormat('EEEE').format(state.dateTime),
+                      style: context.displaySmall?.copyWith(fontSize: 10.0),
+                    ),
+                    4.pw,
+                    SvgPicture.asset(
+                      AppIcons.arrowBottom,
+                    )
+                  ],
+                ),
+              ],
+            );
+          },
         ),
         const Spacer(),
         ZoomTapAnimation(
-          onTap: () {
-            print(AppConstants.dateTime);
-          },
+          onTap: () {},
           child: SvgPicture.asset(
             AppIcons.notification,
           ),

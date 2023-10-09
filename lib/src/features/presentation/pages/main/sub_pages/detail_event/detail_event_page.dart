@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:todo/src/core/colors/colors.dart';
-import 'package:todo/src/core/constants/constants.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/extentions/text_styles.dart';
 import 'package:todo/src/core/icons/icons.dart';
 import 'package:todo/src/features/data/models/todo/todo_model.dart';
 import 'package:todo/src/features/data/repository/event_repository.dart';
 import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.dart';
+import 'package:todo/src/features/presentation/cubits/select_needed_day/select_needed_day_cubit.dart';
+import '../../../../blocs/events_for_calendar/event_for_calendar_bloc.dart';
 import 'widgets/large_appbar.dart';
 
 class DetailEventPage extends StatelessWidget {
@@ -22,6 +23,7 @@ class DetailEventPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var neededDay = BlocProvider.of<SelectNeededDayCubit>(context);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -75,8 +77,10 @@ class DetailEventPage extends StatelessWidget {
                     BlocProvider.of<GetEventsBloc>(context)
                         .add(RemoveTodoByIdEvent(
                       id: todoModel.id,
-                      selectedDate: AppConstants.dateTime.toString(),
+                      selectedDate: neededDay.state.dateTime.toString(),
                     ));
+                    BlocProvider.of<EventsForCalendarBloc>(context)
+                        .add(EventsForCalendarEvent());
                     Navigator.pop(context);
                   },
                   child: Container(

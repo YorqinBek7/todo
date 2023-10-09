@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:todo/src/core/constants/constants.dart';
 import 'package:todo/src/core/extentions/space.dart';
 import 'package:todo/src/core/icons/icons.dart';
 import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.dart';
+import 'package:todo/src/features/presentation/cubits/select_needed_day/select_needed_day_cubit.dart';
 import 'package:todo/src/features/presentation/pages/main/widgets/seek_button.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
@@ -608,11 +608,13 @@ class _DayPicker extends StatefulWidget {
 class _DayPickerState extends State<_DayPicker> {
   /// List of [FocusNode]s, one for each day of the month.
   late List<FocusNode> _dayFocusNodes;
+  late SelectNeededDayCubit neededDayCubit;
 
   @override
   void initState() {
     super.initState();
-    AppConstants.dateTime = widget.currentDate;
+    neededDayCubit = BlocProvider.of<SelectNeededDayCubit>(context);
+    neededDayCubit.selectDate(widget.currentDate);
 
     final int daysInMonth = DateUtils.getDaysInMonth(
         widget.displayedMonth.year, widget.displayedMonth.month);
@@ -769,9 +771,10 @@ class _DayPickerState extends State<_DayPicker> {
                 focusNode: _dayFocusNodes[day - 1],
                 onTap: () {
                   widget.onChanged(dayToBuild);
-                  AppConstants.dateTime = dayToBuild;
-                  BlocProvider.of<GetEventsBloc>(context)
-                      .add(GetTodosEvent(dayToBuild.toString()));
+                  neededDayCubit.selectDate(dayToBuild);
+                  BlocProvider.of<GetEventsBloc>(context).add(
+                    GetTodosEvent(dayToBuild.toString()),
+                  );
                 },
                 radius: _dayPickerRowHeight / 2 + 4,
                 statesController: MaterialStatesController(states),

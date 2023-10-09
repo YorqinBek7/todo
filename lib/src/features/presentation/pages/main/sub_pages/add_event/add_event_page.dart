@@ -11,6 +11,7 @@ import 'package:todo/src/features/data/models/todo/todo_model_key.dart';
 import 'package:todo/src/features/data/repository/event_repository.dart';
 import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.dart';
 import 'package:todo/src/features/presentation/blocs/get_location/get_location_bloc.dart';
+import 'package:todo/src/features/presentation/cubits/select_needed_day/select_needed_day_cubit.dart';
 import 'package:todo/src/features/presentation/pages/locator.dart';
 import '../../../../blocs/events_for_calendar/event_for_calendar_bloc.dart';
 import '../../../../cubits/event_data/event_data_cubit.dart';
@@ -30,7 +31,7 @@ class AddEventPage extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => GetLocationBloc(locator()),
-        )
+        ),
       ],
       child: AddEventView(
         eventRepository: locator(),
@@ -55,8 +56,9 @@ class _AddEventViewState extends State<AddEventView> {
   late TextEditingController _eventDescController;
   late TextEditingController _eventLocationController;
   late TextEditingController _eventTimeController;
-  late EventDataCubit cubit;
-  late GetLocationBloc bloc;
+  late EventDataCubit dataCubit;
+  late GetLocationBloc locationBloc;
+  late SelectNeededDayCubit selectNeededDayCubit;
 
   @override
   void initState() {
@@ -64,8 +66,9 @@ class _AddEventViewState extends State<AddEventView> {
     _eventLocationController = TextEditingController();
     _eventNameController = TextEditingController();
     _eventTimeController = TextEditingController();
-    cubit = BlocProvider.of<EventDataCubit>(context);
-    bloc = BlocProvider.of<GetLocationBloc>(context);
+    dataCubit = BlocProvider.of<EventDataCubit>(context);
+    locationBloc = BlocProvider.of<GetLocationBloc>(context);
+    selectNeededDayCubit = BlocProvider.of<SelectNeededDayCubit>(context);
     super.initState();
   }
 
@@ -110,7 +113,8 @@ class _AddEventViewState extends State<AddEventView> {
                           controller: _eventNameController,
                           title: 'Event name',
                           onChanged: (value) {
-                            cubit.updateTodoData(TodoModelKey.eventName, value);
+                            dataCubit.updateTodoData(
+                                TodoModelKey.eventName, value);
                           },
                         ),
                         16.ph,
@@ -119,7 +123,8 @@ class _AddEventViewState extends State<AddEventView> {
                           title: 'Event description',
                           maxLine: 3,
                           onChanged: (value) {
-                            cubit.updateTodoData(TodoModelKey.eventDesc, value);
+                            dataCubit.updateTodoData(
+                                TodoModelKey.eventDesc, value);
                           },
                         ),
                         16.ph,
@@ -149,7 +154,7 @@ class _AddEventViewState extends State<AddEventView> {
                               )
                               .toList(),
                           onChanged: (value) {
-                            cubit.updateTodoData(
+                            dataCubit.updateTodoData(
                               TodoModelKey.priorityColor,
                               value.toString().substring(6, 16),
                             );
@@ -198,7 +203,7 @@ class _AddEventViewState extends State<AddEventView> {
   void writeLocationToCubitAndTextcontroller(GetLocationSuccess state) {
     if (state.currentLocation.name.isNotEmpty) {
       _eventLocationController.text = state.currentLocation.name;
-      cubit.updateTodoData(
+      dataCubit.updateTodoData(
         TodoModelKey.eventLocation,
         state.currentLocation.name,
       );
@@ -206,7 +211,7 @@ class _AddEventViewState extends State<AddEventView> {
       String splittedAdress =
           '${state.currentLocation.displayName.split(',')[2]},${state.currentLocation.displayName.split(',')[3]}';
       _eventLocationController.text = splittedAdress;
-      cubit.updateTodoData(
+      dataCubit.updateTodoData(
         TodoModelKey.eventLocation,
         splittedAdress,
       );
@@ -217,7 +222,7 @@ class _AddEventViewState extends State<AddEventView> {
   void getTime() async {
     await getEventTime().then((selectedTime) {
       _eventTimeController.text = '${selectedTime.$1} - ${selectedTime.$2}';
-      cubit.updateTodoData(
+      dataCubit.updateTodoData(
           TodoModelKey.eventTime, '${selectedTime.$1} - ${selectedTime.$2}');
     });
   }
@@ -225,7 +230,7 @@ class _AddEventViewState extends State<AddEventView> {
   //GET LOCATION
   void getLocation() async {
     var geo = await _determinePosition();
-    bloc.add(GetCurrentLocationEvent(
+    locationBloc.add(GetCurrentLocationEvent(
       lat: geo.latitude,
       lon: geo.longitude,
     ));
@@ -233,16 +238,16 @@ class _AddEventViewState extends State<AddEventView> {
 
 //ADD EVENT
   void addEvent() async {
-    List<String> eventDate = [AppConstants.dateTime.toString()];
-    cubit.updateTodoData(
+    List<String> eventDate = [selectNeededDayCubit.state.dateTime.toString()];
+    dataCubit.updateTodoData(
       TodoModelKey.eventDate,
       eventDate.join(','),
     );
-    var registerChecker = cubit.canAdd(cubit.state.todoModel);
+    var registerChecker = dataCubit.canAdd(dataCubit.state.todoModel);
     if (registerChecker.$1 == true) {
       BlocProvider.of<GetEventsBloc>(context).add(AddTodoEvent(
-        todoModel: cubit.state.todoModel,
-        selectedDate: AppConstants.dateTime.toString(),
+        todoModel: dataCubit.state.todoModel,
+        selectedDate: selectNeededDayCubit.state.dateTime.toString(),
       ));
       BlocProvider.of<EventsForCalendarBloc>(context)
           .add(EventsForCalendarEvent());

@@ -12,7 +12,9 @@ import 'package:todo/src/features/data/models/todo/todo_model_key.dart';
 import 'package:todo/src/features/data/repository/event_repository.dart';
 import 'package:todo/src/features/presentation/blocs/get_events/get_events_bloc.dart';
 import 'package:todo/src/features/presentation/blocs/get_location/get_location_bloc.dart';
+import 'package:todo/src/features/presentation/cubits/select_needed_day/select_needed_day_cubit.dart';
 import 'package:todo/src/features/presentation/pages/locator.dart';
+import '../../../../blocs/events_for_calendar/event_for_calendar_bloc.dart';
 import '../../../../cubits/event_data/event_data_cubit.dart';
 import '../add_event/widgets/event_field_with_title.dart';
 
@@ -62,6 +64,7 @@ class _EditEventViewState extends State<EditEventView> {
   late TextEditingController _eventTimeController;
   late EventDataCubit cubit;
   late GetLocationBloc bloc;
+  late SelectNeededDayCubit selectNeededDayCubit;
 
   @override
   void initState() {
@@ -248,8 +251,10 @@ class _EditEventViewState extends State<EditEventView> {
       BlocProvider.of<GetEventsBloc>(context).add(EditTodoById(
         id: widget.todoModel.id,
         todoModel: cubit.state.todoModel,
-        selectedDate: AppConstants.dateTime.toString(),
+        selectedDate: selectNeededDayCubit.state.dateTime.toString(),
       ));
+      BlocProvider.of<EventsForCalendarBloc>(context)
+          .add(EventsForCalendarEvent());
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppConstants.mainPage,
