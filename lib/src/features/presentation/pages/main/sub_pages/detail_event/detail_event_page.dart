@@ -44,7 +44,7 @@ class DetailEventPage extends StatelessWidget {
                   ),
                   10.ph,
                   Text(
-                    '15 minutes before',
+                    todoModel.eventTime,
                     style: context.displayMedium?.copyWith(
                       color: AppColors.C_7C7B7B,
                     ),
